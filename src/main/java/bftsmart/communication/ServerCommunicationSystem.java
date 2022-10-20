@@ -23,6 +23,8 @@ import javax.crypto.SecretKey;
 import bftsmart.communication.client.CommunicationSystemServerSide;
 import bftsmart.communication.client.CommunicationSystemServerSideFactory;
 import bftsmart.communication.client.RequestReceiver;
+import bftsmart.communication.server.CommunicationLayer;
+import bftsmart.communication.server.NetrixCommunicationLayer;
 import bftsmart.communication.server.ServersCommunicationLayer;
 import bftsmart.consensus.roles.Acceptor;
 import bftsmart.reconfiguration.ServerViewController;
@@ -46,7 +48,7 @@ public class ServerCommunicationSystem extends Thread {
     private LinkedBlockingQueue<SystemMessage> inQueue = null;//new LinkedBlockingQueue<SystemMessage>(IN_QUEUE_SIZE);
     protected MessageHandler messageHandler;
     
-    private ServersCommunicationLayer serversConn;
+    private CommunicationLayer serversConn;
     private CommunicationSystemServerSide clientsConn;
     private ServerViewController controller;
 
@@ -62,7 +64,11 @@ public class ServerCommunicationSystem extends Thread {
 
         inQueue = new LinkedBlockingQueue<SystemMessage>(controller.getStaticConf().getInQueueSize());
 
-        serversConn = new ServersCommunicationLayer(controller, inQueue, replica);
+        if(controller.getStaticConf().useNetrix()) {
+            serversConn = new NetrixCommunicationLayer(controller, inQueue, replica);
+        } else {
+            serversConn = new ServersCommunicationLayer(controller, inQueue, replica);
+        }
 
         //******* EDUARDO BEGIN **************//
             clientsConn = CommunicationSystemServerSideFactory.getCommunicationSystemServerSide(controller);
@@ -103,7 +109,9 @@ public class ServerCommunicationSystem extends Thread {
      */
     @Override
     public void run() {
-        
+        if (serversConn.getClass() == NetrixCommunicationLayer.class) {
+            serversConn.start();
+        }
         long count = 0;
         while (doWork) {
             try {
@@ -146,7 +154,7 @@ public class ServerCommunicationSystem extends Thread {
         }
     }
 
-    public ServersCommunicationLayer getServersConn() {
+    public CommunicationLayer getServersConn() {
         return serversConn;
     }
     

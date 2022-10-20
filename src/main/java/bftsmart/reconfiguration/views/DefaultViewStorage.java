@@ -31,14 +31,13 @@ public class DefaultViewStorage implements ViewStorage {
 
     private String path = "";
     
-    public DefaultViewStorage(String configPath) {
-        
+    public DefaultViewStorage(int id, String configPath) {
         path = configPath;
         File f = new File(path);
         if (!f.exists()) {
             f.mkdirs();
         }
-        path = path + System.getProperty("file.separator") + "currentView";
+        path = path + System.getProperty("file.separator") + "currentView_" + id;
     }
 
     @Override
@@ -93,6 +92,19 @@ public class DefaultViewStorage implements ViewStorage {
             return (View) ois.readObject();
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public boolean reset() {
+        File f = new File(path);
+        if (!f.exists()) {
+            return true;
+        }
+
+        try {
+            return f.delete();
+        } catch (Exception e) {
+            return false;
         }
     }
 }

@@ -17,6 +17,7 @@ package bftsmart.reconfiguration;
 
 import java.net.SocketAddress;
 
+import bftsmart.reconfiguration.util.NetrixConfiguration;
 import bftsmart.reconfiguration.util.TOMConfiguration;
 import bftsmart.reconfiguration.views.DefaultViewStorage;
 import bftsmart.reconfiguration.views.View;
@@ -32,16 +33,16 @@ public class ViewController {
 
     protected View lastView = null;
     protected View currentView = null;
-    private TOMConfiguration staticConf;
+    private NetrixConfiguration staticConf;
     private ViewStorage viewStore;
 
     public ViewController(int procId, KeyLoader loader) {
-        this.staticConf = new TOMConfiguration(procId, loader);
+        this.staticConf = new NetrixConfiguration(procId, loader);
     }
 
     
     public ViewController(int procId, String configHome, KeyLoader loader) {
-        this.staticConf = new TOMConfiguration(procId, configHome, loader);
+        this.staticConf = new NetrixConfiguration(procId, configHome, loader);
     }
 
     
@@ -49,11 +50,10 @@ public class ViewController {
         if (this.viewStore == null) {
             String className = staticConf.getViewStoreClass();
             try {
-                this.viewStore = (ViewStorage) Class.forName(className).newInstance();
+                this.viewStore = (ViewStorage) Class.forName(className).getDeclaredConstructor().newInstance();
             } catch (Exception e) {
-                this.viewStore = new DefaultViewStorage(this.staticConf.getConfigHome());
+                this.viewStore = new DefaultViewStorage(this.staticConf.getProcessId(), this.staticConf.getConfigHome());
             }
-
         }
         return this.viewStore;
     }
@@ -78,7 +78,7 @@ public class ViewController {
         this.currentView = newView;
     }
 
-    public TOMConfiguration getStaticConf() {
+    public NetrixConfiguration getStaticConf() {
         return staticConf;
     }
 

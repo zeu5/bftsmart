@@ -22,7 +22,6 @@ import java.io.ObjectOutput;
 import bftsmart.communication.SystemMessage;
 
 
-
 /**
  * This class represents a message used in a epoch of a consensus instance.
  */

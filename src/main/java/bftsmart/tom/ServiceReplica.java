@@ -50,6 +50,8 @@ import java.security.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.github.netrixframework.*;
+
 /**
  * This class receives messages from DeliveryThread and manages the execution
  * from the application and reply to the clients. For applications where the
@@ -59,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * batch of messages is delivered to the application and ServiceReplica doesn't
  * need to organize the replies in batches.
  */
-public class ServiceReplica {
+public class ServiceReplica implements DirectiveExecutor {
     
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -105,7 +107,7 @@ public class ServiceReplica {
     /**
      * Constructor
      * 
-     * @see bellow
+     * @see below
      */
     public ServiceReplica(int id, Executable executor, Recoverable recoverer, RequestVerifier verifier, Replier replier) {
         this(id, "", executor, recoverer, verifier, replier, null);
@@ -114,7 +116,7 @@ public class ServiceReplica {
     /**
      * Constructor
      * 
-     * @see bellow
+     * @see below
      */
     public ServiceReplica(int id, Executable executor, Recoverable recoverer, RequestVerifier verifier, Replier replier, KeyLoader loader, Provider provider) {
         this(id, "", executor, recoverer, verifier, replier, loader);
@@ -254,7 +256,7 @@ public class ServiceReplica {
                     tomStackCreated = false;
                     tomLayer = null;
                     cs = null;
-
+                    SVController.getViewStore().reset();
                     init();
                     recoverer.setReplicaContext(replicaCtx);
                     replier.setReplicaContext(replicaCtx);
@@ -508,5 +510,13 @@ public class ServiceReplica {
      */
     public int getId() {
         return id;
+    }
+
+    public void start() {
+
+    }
+
+    public void stop() {
+
     }
 }

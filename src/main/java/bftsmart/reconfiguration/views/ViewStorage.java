@@ -23,5 +23,7 @@ public interface ViewStorage {
     
     public boolean storeView(View view);
     public View readView();
+
+    public boolean reset();
     
 }
