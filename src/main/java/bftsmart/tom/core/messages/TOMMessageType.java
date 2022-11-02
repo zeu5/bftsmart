@@ -15,6 +15,8 @@ limitations under the License.
 */
 package bftsmart.tom.core.messages;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Possible types of TOMMessage
  * 

@@ -25,7 +25,10 @@ import java.io.Externalizable;
 import java.io.IOException;
 
 import bftsmart.communication.SystemMessage;
+import bftsmart.communication.server.GsonHelper;
 import bftsmart.tom.util.DebugInfo;
+import com.google.gson.Gson;
+import io.netty.util.CharsetUtil;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -51,8 +54,8 @@ public class TOMMessage extends SystemMessage implements Externalizable, Compara
 
 	public transient long timestamp = 0; // timestamp to be used by the application
 
-        public transient long seed = 0; // seed for the nonces
-        public transient int numOfNonces = 0; // number of nonces
+	public transient long seed = 0; // seed for the nonces
+	public transient int numOfNonces = 0; // number of nonces
         
 	public transient int destination = -1; // message destination
 	public transient boolean signed = false; // is this message signed?
@@ -60,10 +63,10 @@ public class TOMMessage extends SystemMessage implements Externalizable, Compara
 	public transient long receptionTime;//the reception time of this message (nanoseconds)
 	public transient long receptionTimestamp;//the reception timestamp of this message (miliseconds)
 
-        public transient boolean timeout = false;//this message was timed out?
+	public transient boolean timeout = false;//this message was timed out?
         
-        public transient boolean recvFromClient = false; // Did the client already sent this message to me, or did it arrived in the batch?
-        public transient boolean isValid = false; // Was this request already validated by the replica?
+	public transient boolean recvFromClient = false; // Did the client already sent this message to me, or did it arrived in the batch?
+	public transient boolean isValid = false; // Was this request already validated by the replica?
         
 	//the bytes received from the client and its MAC and signature
 	public transient byte[] serializedMessage = null;
@@ -234,7 +237,7 @@ public class TOMMessage extends SystemMessage implements Externalizable, Compara
 		out.writeInt(sequence);
 		out.writeInt(operationId);
 		out.writeInt(replyServer);
-		
+
 		if (content == null) {
 			out.writeInt(-1);
 		} else {

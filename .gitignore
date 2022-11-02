@@ -1,5 +1,5 @@
 bin/main/bftsmart
-config/currentView
+config/currentView*
 test
 
 # Ignore Gradle project-specific cache directory
@@ -8,9 +8,5 @@ test
 # Ignore Gradle build output directory
 build
 
-<<<<<<< Updated upstream
 # Editor config
 .idea
-=======
-.idea
->>>>>>> Stashed changes

@@ -15,6 +15,7 @@ limitations under the License.
 */
 package bftsmart.communication.client.netty;
 
+import bftsmart.tom.core.messages.TOMMessage;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -43,15 +44,21 @@ public class NettyClientPipelineFactory{
 
 
     public ByteToMessageDecoder getDecoder(){
+        if (controller.getStaticConf().isUseJsonClient()) {
+            return new NettyJsonMessageDecoder(true, sessionTable, controller, rl);
+        }
     	return new NettyTOMMessageDecoder(true, sessionTable,
     			controller,rl);	
     }
     
-    public MessageToByteEncoder getEncoder(){
+    public MessageToByteEncoder<TOMMessage> getEncoder(){
+        if (controller. getStaticConf().isUseJsonClient()) {
+            return new NettyJsonMessageEncoder(true, sessionTable, rl);
+        }
     	return new NettyTOMMessageEncoder(true, sessionTable,rl);	
     }
     
-    public SimpleChannelInboundHandler getHandler(){
+    public SimpleChannelInboundHandler<TOMMessage> getHandler(){
     	return ncs;	
     }
 

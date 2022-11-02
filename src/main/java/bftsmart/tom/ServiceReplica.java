@@ -480,7 +480,6 @@ public class ServiceReplica implements DirectiveExecutor {
 
         tomLayer.start(); // start the layer execution
         tomStackCreated = true;
-
     }
 
     /**

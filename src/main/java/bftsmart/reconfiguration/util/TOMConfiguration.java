@@ -59,6 +59,8 @@ public class TOMConfiguration extends Configuration {
     private boolean isToWriteCkpsToDisk;
     private boolean syncCkp;
     private boolean isBFT;
+
+    private boolean useJsonClient;
     private int numRepliers;
     private int numNettyWorkers;
     private boolean sameBatchSize;
@@ -186,6 +188,9 @@ public class TOMConfiguration extends Configuration {
             } else {
                 numberOfNonces = Integer.parseInt(s);
             }
+
+            s = (String) configs.remove("system.communication.useJsonClient");
+            useJsonClient = Boolean.parseBoolean(s);
 
             s = (String) configs.remove("system.communication.useSenderThread");
             if (s == null) {
@@ -641,4 +646,7 @@ public class TOMConfiguration extends Configuration {
 		return enabledCiphers;
 	}
 
+    public boolean isUseJsonClient() {
+        return useJsonClient;
+    }
 }

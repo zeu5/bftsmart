@@ -42,8 +42,6 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
 
         NetrixConfiguration c = controller.getStaticConf();
 
-
-
         NetrixClientConfig config = new NetrixClientConfig(
                 Integer.toString(replica.getId()),
                 c.getNetrixAddr(),
@@ -52,7 +50,7 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
                 c.getNetrixClientAdvAddr(),
                 new HashMap<String, String>()
         );
-        this.client = new NetrixClient(config, replica);
+        this.client = NetrixClientSingleton.init(config, replica);
     }
 
     public SecretKey getSecretKey(int id) {

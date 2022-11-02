@@ -18,12 +18,14 @@ package bftsmart.consensus.roles;
 import bftsmart.communication.ServerCommunicationSystem;
 import bftsmart.consensus.messages.MessageFactory;
 import bftsmart.reconfiguration.ServerViewController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents the proposer role in the consensus protocol.
  **/
 public class Proposer {
-
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private MessageFactory factory; // Factory for PaW messages
     private ServerCommunicationSystem communication; // Replicas comunication system
     private ServerViewController controller;
@@ -51,6 +53,7 @@ public class Proposer {
      * @param value Value to be proposed
      */
     public void startConsensus(int cid, byte[] value) {
+        logger.info("Sending proposal");
         //******* EDUARDO BEGIN **************//
         communication.send(this.controller.getCurrentViewAcceptors(),
                 factory.createPropose(cid, 0, value));
