@@ -432,7 +432,6 @@ public final class TOMLayer extends Thread implements RequestReceiver {
 
             if (!doWork) break;
 
-            logger.info("I'm the leader.");
 
             // blocks until there are requests to be processed/ordered
             messagesLock.lock();
@@ -455,6 +454,7 @@ public final class TOMLayer extends Thread implements RequestReceiver {
                     (clientsManager.havePendingRequests()) && //there are messages to be ordered
                     (getInExec() == -1)) { //there is no consensus in execution
 
+                logger.info("I'm the leader.");
                 // Sets the current consensus
                 int execId = getLastExec() + 1;
                 setInExec(execId);

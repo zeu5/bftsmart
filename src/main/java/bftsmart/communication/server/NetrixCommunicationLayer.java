@@ -30,6 +30,7 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
     private ServiceReplica replica;
     private LinkedBlockingQueue<SystemMessage> inQueue;
     private NetrixClient client;
+    private int me;
 
     private boolean doWork = true;
 
@@ -41,6 +42,7 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
         this.replica = replica;
 
         NetrixConfiguration c = controller.getStaticConf();
+        this.me = c.getProcessId();
 
         NetrixClientConfig config = new NetrixClientConfig(
                 Integer.toString(replica.getId()),
@@ -62,10 +64,12 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
     public final void send(int[] targets, SystemMessage sm, boolean useMAC) {
         byte[] data;
         if(sm instanceof ConsensusMessage) {
-            logger.info("Sending a consensus message");
+            logger.debug("Sending a consensus message");
             ConsensusMessage cm = (ConsensusMessage) sm;
             Gson gson = GsonHelper.gson;
-            data = gson.toJson(cm).getBytes(StandardCharsets.UTF_8);
+            String jsonString = gson.toJson(cm);
+            logger.debug("Sending a consensus message: "+jsonString);
+            data = jsonString.getBytes(StandardCharsets.UTF_8);
         } else {
             ByteArrayOutputStream bOut = new ByteArrayOutputStream(248);
             try {
@@ -77,15 +81,20 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
         }
 
         for(int t: targets) {
-            try {
-                this.client.sendMessage(new Message(
-                        Integer.toString(t),
-                        sm.getClass() == ConsensusMessage.class? ((ConsensusMessage) sm).getPaxosVerboseType(): "other",
-                        data
-                ));
-            } catch (IOException e) {
-                logger.error("Failed to send message", e);
-            }
+//            if (t == me) {
+//                sm.authenticated = true;
+//                inQueue.offer(sm);
+//            } else {
+                try {
+                    this.client.sendMessage(new Message(
+                            Integer.toString(t),
+                            sm.getClass() == ConsensusMessage.class? ((ConsensusMessage) sm).getPaxosVerboseType(): "other",
+                            data
+                    ));
+                } catch (IOException e) {
+                    logger.error("Failed to send message", e);
+                }
+//            }
         }
     }
 

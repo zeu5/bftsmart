@@ -107,6 +107,7 @@ public class RequestsTimer {
      * @param request Request to which the timer is being createf for
      */
     public void watch(TOMMessage request) {
+        logger.debug("Watching request: "+ request.getSequence());
         //long startInstant = System.nanoTime();
         rwLock.writeLock().lock();
         watched.add(request);
@@ -119,6 +120,7 @@ public class RequestsTimer {
      * @param request Request whose timer is to be canceled
      */
     public void unwatch(TOMMessage request) {
+        logger.debug("UnWatching request: "+request.getSequence());
         //long startInstant = System.nanoTime();
         rwLock.writeLock().lock();
         if (watched.remove(request) && watched.isEmpty()) stopTimer();
@@ -144,6 +146,7 @@ public class RequestsTimer {
     }
     
     public void run_lc_protocol() {
+        logger.debug("Running leader change protocol");
         
         long t = (shortTimeout > -1 ? shortTimeout : timeout);
         
@@ -161,9 +164,7 @@ public class RequestsTimer {
                     pendingRequests.add(request);
                 }
             }
-            
         } finally {
-            
             rwLock.readLock().unlock();
         }
         
@@ -253,6 +254,7 @@ public class RequestsTimer {
          * message on the watched list.
          */
         public void run() {
+            logger.info("Triggering leader change");
             
             int[] myself = new int[1];
             myself[0] = controller.getStaticConf().getProcessId();

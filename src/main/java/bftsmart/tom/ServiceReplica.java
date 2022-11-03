@@ -80,6 +80,7 @@ public class ServiceReplica implements DirectiveExecutor {
     private ReplicaContext replicaCtx = null;
     private Replier replier = null;
     private RequestVerifier verifier = null;
+    private ShutdownHookThread shutdownHookThread = null;
 
     /**
      * Constructor
@@ -474,7 +475,12 @@ public class ServiceReplica implements DirectiveExecutor {
         acceptor.setTOMLayer(tomLayer);
 
         if (SVController.getStaticConf().isShutdownHookEnabled()) {
-            Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(tomLayer));
+            Runtime rt = Runtime.getRuntime();
+            if (shutdownHookThread != null) {
+                rt.removeShutdownHook(shutdownHookThread);
+            }
+            shutdownHookThread = new ShutdownHookThread(tomLayer);
+            rt.addShutdownHook(shutdownHookThread);
         }
         replicaCtx = new ReplicaContext(cs, SVController);
 

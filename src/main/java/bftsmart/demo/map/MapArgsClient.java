@@ -33,7 +33,7 @@ public class MapArgsClient {
     }
 
     public static void get(String[] args, MapClient<String, String> client) {
-        if (args.length < 3) {
+        if (args.length != 3) {
             System.out.println("Usage: get <key>");
             return;
         }
@@ -41,7 +41,7 @@ public class MapArgsClient {
     }
 
     public static void set(String[] args, MapClient<String, String> client) {
-        if (args.length < 4) {
+        if (args.length != 4) {
             System.out.println("Usage: set <key> <value>");
             return;
         }
@@ -49,7 +49,7 @@ public class MapArgsClient {
     }
 
     public static void delete(String[] args, MapClient<String, String> client) {
-        if (args.length < 3) {
+        if (args.length != 3) {
             System.out.println("Usage: delete <key>");
             return;
         }

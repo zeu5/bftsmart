@@ -89,9 +89,9 @@ public class MessageHandler {
 						logger.info("Received leader change message of type {} " + "for regency {} from replica {}",
 								type, lcMsg.getReg(), lcMsg.getSender());
 					else
-						logger.debug("Received leader change message from myself");
+						logger.info("Received leader change message from myself");
 					
-					if (lcMsg.TRIGGER_LC_LOCALLY)
+					if (lcMsg.triggerLCLocally())
 						tomLayer.requestsTimer.run_lc_protocol();
 					else
 						tomLayer.getSynchronizer().deliverTimeoutRequest(lcMsg);
