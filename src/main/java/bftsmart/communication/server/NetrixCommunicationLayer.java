@@ -5,6 +5,10 @@ import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.reconfiguration.util.NetrixConfiguration;
 import bftsmart.tom.ServiceReplica;
+import bftsmart.tom.leaderchange.LCManager;
+import bftsmart.tom.leaderchange.LCMessage;
+import bftsmart.tom.util.TOMUtil;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonPrimitive;
 import io.github.netrixframework.comm.Message;
@@ -61,15 +65,45 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
 
     public void updateConnections() {}
 
-    public final void send(int[] targets, SystemMessage sm, boolean useMAC) {
-        byte[] data;
+    private SystemMessage unMarshalMessage(String type, byte[] data) throws Exception{
+        SystemMessage sm;
+        Gson gson = GsonHelper.gson;
+        switch(type) {
+            case "PROPOSE":
+            case "ACCEPT":
+            case "WRITE":
+                sm = gson.fromJson(new String(data, CharsetUtil.UTF_8), ConsensusMessage.class);
+                break;
+            case "STOP":
+            case "STOPDATA":
+            case "SYNC":
+            case "TRIGGER_LC_LOCALLY":
+                sm = gson.fromJson(new String(data, CharsetUtil.UTF_8), LCMessage.class);
+                break;
+            case "other":
+            default:
+                sm = (SystemMessage) (new ObjectInputStream(new ByteArrayInputStream(data))
+                .readObject());
+        }
+        sm.authenticated = true;
+        return sm;
+    }
+
+    private byte[] marshalMessage(SystemMessage sm) {
         if(sm instanceof ConsensusMessage) {
             logger.debug("Sending a consensus message");
             ConsensusMessage cm = (ConsensusMessage) sm;
             Gson gson = GsonHelper.gson;
             String jsonString = gson.toJson(cm);
             logger.debug("Sending a consensus message: "+jsonString);
-            data = jsonString.getBytes(StandardCharsets.UTF_8);
+            return jsonString.getBytes(StandardCharsets.UTF_8);
+        } else if(sm instanceof LCMessage) {
+            logger.debug("Sending a leader change message");
+            LCMessage cm = (LCMessage) sm;
+            Gson gson = GsonHelper.gson;
+            String jsonString = gson.toJson(cm);
+            logger.debug("Sending a leader change message: "+jsonString);
+            return jsonString.getBytes(StandardCharsets.UTF_8);
         } else {
             ByteArrayOutputStream bOut = new ByteArrayOutputStream(248);
             try {
@@ -77,24 +111,30 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
             } catch (IOException e) {
                 logger.error("Failed to serialize message", e);
             }
-            data = bOut.toByteArray();
+            return bOut.toByteArray();
+        }
+    }
+
+    public final void send(int[] targets, SystemMessage sm, boolean useMAC) {
+        byte[] data = marshalMessage(sm);
+
+        String messageType = "other";
+        if(sm.getClass() == ConsensusMessage.class) {
+            messageType = ((ConsensusMessage) sm).getPaxosVerboseType();
+        } else if (sm.getClass() == LCMessage.class) {
+            messageType = ((LCMessage) sm).getTypeString();
         }
 
         for(int t: targets) {
-//            if (t == me) {
-//                sm.authenticated = true;
-//                inQueue.offer(sm);
-//            } else {
-                try {
-                    this.client.sendMessage(new Message(
-                            Integer.toString(t),
-                            sm.getClass() == ConsensusMessage.class? ((ConsensusMessage) sm).getPaxosVerboseType(): "other",
-                            data
-                    ));
-                } catch (IOException e) {
-                    logger.error("Failed to send message", e);
-                }
-//            }
+            try {
+                this.client.sendMessage(new Message(
+                        Integer.toString(t),
+                        messageType,
+                        data
+                ));
+            } catch (IOException e) {
+                logger.error("Failed to send message", e);
+            }
         }
     }
 
@@ -118,15 +158,7 @@ public class NetrixCommunicationLayer extends CommunicationLayer{
             Vector<Message> messages = this.client.getMessages();
             for(Message m: messages) {
                 try {
-                    SystemMessage sm;
-                    if (!Objects.equals(m.getType(), "other")) {
-                        Gson gson = GsonHelper.gson;
-                        sm = gson.fromJson(new String(m.getData(), CharsetUtil.UTF_8), ConsensusMessage.class);
-                    } else {
-                        sm = (SystemMessage) (new ObjectInputStream(new ByteArrayInputStream(m.getData()))
-                                .readObject());
-                    }
-                    sm.authenticated = true;
+                    SystemMessage sm = unMarshalMessage(m.getType(), m.getData());
                     if(!inQueue.offer(sm)) {
                         logger.warn("Inqueue full (message from " + sm.getSender() + " discarded).");
                     }

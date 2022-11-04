@@ -24,6 +24,8 @@ import bftsmart.tom.leaderchange.CertifiedDecision;
 import bftsmart.tom.util.BatchBuilder;
 import bftsmart.tom.util.BatchReader;
 import bftsmart.tom.util.TOMUtil;
+import io.github.netrixframework.NetrixClient;
+import io.github.netrixframework.NetrixClientSingleton;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,9 +35,11 @@ import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.SignedObject;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
@@ -1154,6 +1158,18 @@ public class Synchronizer {
                 e = cons.createEpoch(regency, controller);
             } else {
                 e.clear();
+            }
+
+            NetrixClient client = NetrixClientSingleton.getClient();
+            if (client != null) {
+                try {
+                    HashMap<String, String> params = new HashMap<String, String>();
+                    params.put("leader", String.valueOf(execManager.getCurrentLeader()));
+                    params.put("epoch", String.valueOf(regency));
+                    client.sendEvent("NewEpoch", params);
+                } catch (Exception ignored) {
+
+                }
             }
             
             /********* LEADER CHANGE CODE ********/

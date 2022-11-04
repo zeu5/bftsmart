@@ -20,10 +20,12 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.security.PrivateKey;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.bouncycastle.jcajce.provider.digest.GOST3411.HashMac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +39,9 @@ import bftsmart.tom.core.ExecutionManager;
 import bftsmart.tom.core.TOMLayer;
 import bftsmart.tom.core.messages.TOMMessage;
 import bftsmart.tom.util.TOMUtil;
+import io.github.netrixframework.NetrixClient;
+import io.github.netrixframework.NetrixClientSingleton;
+import io.netty.util.CharsetUtil;
 
 /**
  * This class represents the acceptor role in the consensus protocol. This class
@@ -428,6 +433,16 @@ public final class Acceptor {
 		if (epoch.getConsensus().getDecision().firstMessageProposed != null)
 			epoch.getConsensus().getDecision().firstMessageProposed.decisionTime = System.nanoTime();
 
+		NetrixClient client = NetrixClientSingleton.getClient();
+		try {
+			HashMap<String, String> params = new HashMap<String, String>();
+			params.put("epoch", String.valueOf(epoch.getTimestamp()));
+			params.put("value", new String(epoch.propValue, CharsetUtil.UTF_8));
+
+			client.sendEvent("Decided", params);
+		} catch (Exception ignored) {
+
+		}
 		epoch.getConsensus().decided(epoch, true);
 	}
 }
