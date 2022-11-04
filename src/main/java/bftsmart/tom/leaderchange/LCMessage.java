@@ -59,6 +59,21 @@ public class LCMessage extends SystemMessage {
         return type == TOMUtil.TRIGGER_LC_LOCALLY && sender == -1;
     }
 
+    public String getTypeString() {
+        switch(type) {
+            case TOMUtil.STOP:
+                return "STOP";
+            case TOMUtil.STOPDATA:
+                return "STOPDATA";
+            case TOMUtil.SYNC:
+                return "SYNC";
+            case TOMUtil.TRIGGER_LC_LOCALLY:
+                return "TRIGGER_LC_LOCALLY";
+            default:
+                return "";
+        }
+    }
+
     /**
      * Get type of message
      * @return type of message
