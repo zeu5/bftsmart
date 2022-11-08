@@ -5,12 +5,9 @@ import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.reconfiguration.util.NetrixConfiguration;
 import bftsmart.tom.ServiceReplica;
-import bftsmart.tom.leaderchange.LCManager;
 import bftsmart.tom.leaderchange.LCMessage;
-import bftsmart.tom.util.TOMUtil;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonPrimitive;
 import io.github.netrixframework.comm.Message;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
@@ -19,34 +16,23 @@ import io.github.netrixframework.*;
 import javax.crypto.SecretKey;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonElement;
-
 public class NetrixCommunicationLayer extends CommunicationLayer{
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private ServerViewController controller;
-    private ServiceReplica replica;
     private LinkedBlockingQueue<SystemMessage> inQueue;
     private NetrixClient client;
-    private int me;
 
     private boolean doWork = true;
 
     public NetrixCommunicationLayer(ServerViewController controller,
                                     LinkedBlockingQueue<SystemMessage> inQueue,
                                     ServiceReplica replica) {
-        this.controller = controller;
         this.inQueue = inQueue;
-        this.replica = replica;
 
         NetrixConfiguration c = controller.getStaticConf();
-        this.me = c.getProcessId();
 
         NetrixClientConfig config = new NetrixClientConfig(
                 Integer.toString(replica.getId()),

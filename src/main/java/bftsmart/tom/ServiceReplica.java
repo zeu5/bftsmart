@@ -148,7 +148,9 @@ public class ServiceReplica implements DirectiveExecutor {
     // this method initializes the object
     private void init() {
         try {
-            cs = new ServerCommunicationSystem(this.SVController, this);
+            if (cs == null) {
+                cs = new ServerCommunicationSystem(this.SVController, this);
+            }
         } catch (Exception ex) {
             logger.error("Failed to initialize replica-to-replica communication system", ex);
             throw new RuntimeException("Unable to build a communication system.");
@@ -245,8 +247,8 @@ public class ServiceReplica implements DirectiveExecutor {
                     tomLayer.shutdown();
 
                     try {
-                        cs.join();
-                        cs.getServersConn().join();
+                        // cs.join();
+                        // cs.getServersConn().join();
                         tomLayer.join();
                         tomLayer.getDeliveryThread().join();
 
@@ -256,9 +258,10 @@ public class ServiceReplica implements DirectiveExecutor {
 
                     tomStackCreated = false;
                     tomLayer = null;
-                    cs = null;
+                    // cs = null;
                     SVController.getViewStore().reset();
                     init();
+                    System.gc();
                     recoverer.setReplicaContext(replicaCtx);
                     replier.setReplicaContext(replicaCtx);
                 
